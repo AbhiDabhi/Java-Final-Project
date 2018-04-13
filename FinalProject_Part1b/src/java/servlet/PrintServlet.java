@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.MarketingAgents;
+import model.Locations;
 import service.PrintService;
 
 /**
@@ -60,6 +61,26 @@ PrintService printService;
                 deleteMarketingAgent(request, response);
                 break;    
                 
+            case "/addLocation":
+                addLocations(request, response);
+                break;
+            
+            case "/editLocation":
+                showLocation(request, response);
+                break;
+            
+            case "/updateLocation":
+                updateLocation(request, response);
+                break;
+                
+            case "/deleteLocation":
+                deleteLocation(request, response);
+                break;
+                
+            case "/listLocations":
+                readLocations(request, response);
+                break;
+            
             default:
                 readMarketingAgents(request, response);
                 break;
@@ -138,4 +159,68 @@ PrintService printService;
         RequestDispatcher dispatcher = request.getRequestDispatcher("list");
         dispatcher.forward(request,response);
     }
+    
+    protected void addLocations(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String locationName = request.getParameter("locationName");
+        int distributionCapacity = Integer.parseInt(request.getParameter("distributionCapacity"));
+        
+        int res = printService.createLocations(locationName, distributionCapacity, printDao);
+        
+        if(res > 0){
+            RequestDispatcher dispatcher = request.getRequestDispatcher("listLocations");
+            dispatcher.forward(request, response);
+        }
+        else{
+            response.sendRedirect("error.jsp");
+        }
+    }
+    
+    protected void readLocations(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        ArrayList<Locations> locationsList = new ArrayList();
+        locationsList = printService.readLocations(printDao);
+        
+        request.setAttribute("locationsList", locationsList);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("displayLocations.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    protected void showLocation(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        try{
+            Locations location = printService.showLocationInfo(id, printDao);
+            request.setAttribute("location", location);
+            
+            RequestDispatcher dispatcher = request.getRequestDispatcher("editLocations.jsp");
+            dispatcher.forward(request, response);
+            
+        } catch(SQLException sqlEx){
+            sqlEx.printStackTrace();
+        }
+    }
+    
+    protected void updateLocation(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        String locationName = request.getParameter("locationName");
+        int distributionCapacity = Integer.parseInt(request.getParameter("distributionCapacity"));
+        
+        Locations location = new Locations(id, locationName, distributionCapacity);
+        printService.updateLocationInfo(location, printDao);
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("listLocations");
+        dispatcher.forward(request, response);
+    }
+    
+    protected void deleteLocation(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        printService.deleteLocation(id, printDao);
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("listLocations");
+        dispatcher.forward(request,response);
+    }
+
 }

@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import model.MarketingAgents;
+import model.Locations;
 
 /**
  *
@@ -181,4 +182,129 @@ public class PrintDao {
         }
         return result;
     }
+    
+    public int createLocations(Locations locationObj) {
+        int res = 0;
+        String sql = "INSERT INTO location (locationName, distributionCapacity) VALUES (?, ?)";
+        
+        try {
+            Connection conn = getConnection();
+            if(conn!=null){
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, locationObj.getLocationName());
+                stmt.setInt(2, locationObj.getDistributionCapacity());
+                res = stmt.executeUpdate();
+                conn.close();
+            }
+        }
+        catch (SQLException ex){
+            ex.printStackTrace();
+        }
+        return res;
+    }
+    
+    public ArrayList<Locations> readLocations(){
+        ArrayList<Locations> locationsList = new ArrayList<>();
+        String query = "SELECT * FROM location";
+        
+        try{
+            Connection conn = getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet resultSet = stmt.executeQuery(query);
+            
+            while(resultSet.next()){
+                Locations locations = new Locations();
+                locations.setId(resultSet.getInt("id"));
+                locations.setLocationName(resultSet.getString("locationName"));
+                locations.setDistributionCapacity(resultSet.getInt("distributionCapacity"));
+                locationsList.add(locations);
+            }
+            resultSet.close();
+            stmt.close();
+             
+            if(conn!=null && !conn.isClosed()){
+                conn.close();
+            }
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
+        return locationsList;
+    }
+    
+    public Locations showLocationInfo(int id){
+        Locations location = null;
+        String query = "SELECT * FROM location WHERE id = ?";
+        
+        try{
+            Connection conn = getConnection();
+            PreparedStatement preStmt = conn.prepareStatement(query);
+            preStmt.setInt(1, id);
+            ResultSet resultSet = preStmt.executeQuery();
+            
+            while(resultSet.next()){
+                location = new Locations();
+                location.setId(resultSet.getInt("id"));
+                location.setLocationName(resultSet.getString("locationName"));
+                location.setDistributionCapacity(resultSet.getInt("distributionCapacity"));
+            }
+            resultSet.close();
+            preStmt.close();
+            
+            if(conn != null || !conn.isClosed()){
+                conn.close();
+            }
+        }
+        catch(SQLException ex){
+            ex.printStackTrace();
+        }
+        return location;
+    }
+    
+    public boolean updateLocationInfo(Locations location) {
+        boolean result = false;
+        String query = "UPDATE location SET locationName = ?, distributionCapacity = ? WHERE id = ?";
+        
+        try{
+            Connection conn = getConnection();
+            PreparedStatement preStmt = conn.prepareStatement(query);
+            preStmt.setString(1, location.getLocationName());
+            preStmt.setInt(2, location.getDistributionCapacity());
+            preStmt.setInt(3, location.getId());
+            
+            if(preStmt.executeUpdate() > 0){
+                result = true;
+            }
+            else{
+                result = false;
+            }
+            
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
+        return result;
+    }
+    
+    public boolean deleteLocation(int id){
+        boolean result = false;
+        String query = "DELETE FROM location WHERE id = ?";
+        
+        try{
+            Connection conn = getConnection();
+            PreparedStatement preStmt = conn.prepareStatement(query);
+            preStmt.setInt(1, id);
+            int res = preStmt.executeUpdate();
+            
+            if(res > 0){
+                result = true;
+            }
+            else{
+                result = false;
+            }
+        }
+        catch(SQLException ex){
+            ex.printStackTrace();
+        }
+        return result;
+    }
+
 }

@@ -9,6 +9,7 @@ import dao.PrintDao;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import model.MarketingAgents;
+import model.Locations;
 
 /**
  *
@@ -49,4 +50,39 @@ public class PrintService {
         boolean result = printDao.deleteMarketingAgent(id);
         return result;
     }
+    
+    public int createLocations(String locationName, int distributionCapacity, PrintDao printDao) {
+        int res = 0;
+        Locations locationObj = new Locations();
+     
+        if(locationName != null) {
+            locationObj.setLocationName(locationName);
+            locationObj.setDistributionCapacity(distributionCapacity);
+            res = printDao.createLocations(locationObj);
+        }
+        
+        return res;
+    }
+    
+    public ArrayList<Locations> readLocations(PrintDao printDao){
+        ArrayList<Locations> locationsList = new ArrayList();
+        locationsList = printDao.readLocations();
+        return locationsList;
+    }
+    
+    public Locations showLocationInfo(int id, PrintDao printDao) throws SQLException{
+        Locations location = printDao.showLocationInfo(id);    
+        return location;
+    }
+    
+    public boolean updateLocationInfo(Locations location, PrintDao printDao){
+        boolean result = printDao.updateLocationInfo(location);
+        return result;
+    }
+    
+    public boolean deleteLocation(int id, PrintDao printDao){
+        boolean result = printDao.deleteLocation(id);
+        return result;
+    }
+
 }
